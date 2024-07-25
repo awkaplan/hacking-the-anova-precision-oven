@@ -1,0 +1,272 @@
+---
+  openapi: "3.0.0"
+  info: 
+    # version: "1.0"
+    title: "Anova Precision Oven Provision API"
+    description: "Used for provisioning the Anova Precision Oven from the mobile app"
+  servers: 
+    - 
+      url: "{scheme}://192.168.4.1/{basePath}"
+      variables: 
+        scheme: 
+          enum: 
+            - "http"
+          default: "http"
+        basePath: 
+          default: ""
+  tags: 
+    - name: "prov-identity"
+    - name: "app-info"
+    - name: "prov-scan"
+    - name: "prov-config"
+    - name: "prov-status"
+    - name: "prov-end"
+  components: 
+    schemas: 
+      ErrorModel: 
+        type: "object"
+        properties: 
+          code: 
+            type: "string"
+  paths: 
+    /prov-identity: 
+      post: 
+        security: []
+        tags: 
+          - "prov-identity"
+        summary: "Sends the Anova userId to the APO and returns the Oven ID"
+        parameters: []
+        requestBody: 
+          required: true
+          content: 
+            application/x-www-form-urlencoded: 
+              schema: 
+                type: "object"
+                properties: 
+                  user_id:
+                    type: "string"
+                required: 
+                  - "{\"user_id\":\"<redacted>\"}"
+        responses: 
+          200: 
+            description: "OK"
+            content: 
+              text/html: 
+                schema: 
+                  type: "object"
+                  properties: 
+                    device_id: 
+                      type: "string"
+                example: 
+                  device_id: "anova<redacted>"
+          default: 
+            description: "Unexpected error"
+            content: 
+              text/html: 
+                example: 
+                  message: "Sorry unable to perform operation."
+    /app-info: 
+      post: 
+        security: []
+        tags: 
+          - "app-info"
+        summary: "Gets the firmware build version and build date."
+        parameters: []
+        requestBody: 
+          required: true
+          content: 
+            application/x-www-form-urlencoded: 
+              schema: 
+                type: "object"
+                required: 
+                  - "{}"
+        responses: 
+          200: 
+            description: "OK"
+            content: 
+              text/html: 
+                schema: 
+                  type: "object"
+                  properties: 
+                    version: 
+                      type: "string"
+                    build-date: 
+                      type: "string"
+                example: 
+                  version: "1.1.23"
+                  build-date: "May  7 2021 11:07:06"
+          default: 
+            description: "Unexpected error"
+            content: 
+              text/html: 
+                example: 
+                  message: "Sorry unable to perform operation."
+    /prov-scan: 
+      post: 
+        security: []
+        tags: 
+          - "prov-scan"
+        summary: "Get a list of available SSID's"
+        parameters: []
+        requestBody: 
+          required: true
+          content: 
+            application/x-www-form-urlencoded: 
+              schema: 
+                type: "object"
+                properties: 
+                  request:
+                    type: "string"
+                    enum:
+                      - "start"
+                      - "status"
+                      - "results"
+                    description: >
+                      Requests:
+                        * `start`: Start the SSID scan
+                        * `status`: Get the status of the SSID scan
+                        * `results`: Get the results of the SSID scan
+                required:
+                  - "request"
+        responses: 
+          200: 
+            description: "OK"
+            content: 
+              text/html: 
+                schema:
+                  oneOf:
+                    - type: "array"
+                      items: 
+                        type: "object"
+                        properties: 
+                          ssid: 
+                            type: "string"
+                          auth: 
+                            type: "number"
+                          rssi: 
+                            type: "number"
+                        required: 
+                          - "ssid"
+                          - "auth"
+                          - "rssi"
+                    - type: "object"
+                      properties:
+                        status:
+                          type: "string"
+                          enum:
+                            - "complete"
+                            - "OK"
+                      required:
+                        - "status"
+          default: 
+            description: "Unexpected error"
+            content: 
+              text/html: 
+                example: 
+                  message: "Sorry unable to perform operation."
+    /prov-config: 
+      post: 
+        security: []
+        tags: 
+          - "prov-config"
+        summary: "prov-config"
+        parameters: []
+        requestBody: 
+          required: true
+          content: 
+            application/x-www-form-urlencoded: 
+              schema: 
+                type: "object"
+                properties: 
+                  set_wifi:
+                    type: "object"
+                    properties: 
+                      ssid: 
+                        type: "string"
+                      passkey: 
+                        type: "string"
+                required: 
+                  - "{\"set_wifi\":{\"ssid\":\"<redacted>\",\"passkey\":\"<redacted>\"}}"
+        responses: 
+          200: 
+            description: "OK"
+            content: 
+              text/html: 
+                schema: 
+                  type: null
+                example: 
+                  status: "OK"
+          default: 
+            description: "Unexpected error"
+            content: 
+              text/html: 
+                example: 
+                  message: "Sorry unable to perform operation."
+    /prov-status: 
+      post: 
+        security: []
+        tags: 
+          - "prov-status"
+        summary: "prov-status"
+        parameters: []
+        requestBody: 
+          required: true
+          content: 
+            application/x-www-form-urlencoded: 
+              schema: 
+                type: "string"
+                required: 
+                  - "{}"
+                example: 
+                  - "{}"
+        responses: 
+          200: 
+            description: "OK"
+            content: 
+              text/html: 
+                schema: 
+                  type: "object"
+                  properties: 
+                    status: 
+                      type: "string"
+                example: 
+                  status: "connected"
+          default: 
+            description: "Unexpected error"
+            content: 
+              text/html: 
+                example: 
+                  message: "Sorry unable to perform operation."
+    /prov-end: 
+      post: 
+        security: []
+        tags: 
+          - "prov-end"
+        summary: "prov-end"
+        parameters: []
+        requestBody: 
+          required: true
+          content: 
+            application/x-www-form-urlencoded: 
+              schema: 
+                type: "string"
+                required: 
+                  - "{}"
+        responses: 
+          200: 
+            description: "OK"
+            content: 
+              text/html: 
+                schema: 
+                  type: "object"
+                  properties: 
+                    status: 
+                      type: "string"
+                example: 
+                  status: "OK"
+          default: 
+            description: "Unexpected error"
+            content: 
+              text/html: 
+                example: 
+                  message: "Sorry unable to perform operation."
